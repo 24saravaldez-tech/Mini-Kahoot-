@@ -26,7 +26,7 @@ class Jugador {
     }
 
     get respuestasCorrectas() {
-        return this.#puntaje
+        return this.#respuestasCorrectas
     }
 
     set respuestasCorrectas(value) {
@@ -34,21 +34,25 @@ class Jugador {
     }
 
     sumarPuntos(puntos) {
-        this.puntaje = this.puntaje + puntos
+        this.#puntaje = this.#puntaje + puntos
     }
 
     aumentarCorrectas() {
-        this.respuestasCorrectas = this.respuestasCorrectas + 1
+        // return this.respuestasCorrectas = this.respuestasCorrectas + 1;
+        this.respuestasCorrectas = this.respuestasCorrectas + 1;
     }
 
     //Principio solid
 
     reiniciar() {
-        this.nombre = ''
-        this.respuestasCorrectas = 0
-        this.puntaje = 0
+        this.nombre = '';
+        this.respuestasCorrectas = 0;
+        this.puntaje = 0;
     }
 }
+
+
+
 
 
 class Pregunta {
@@ -114,7 +118,7 @@ class Quiz {
     #indice;
 
 
-    constructor(preguntas, preguntaActual, jugador) {
+    constructor(preguntas, jugador) {
         this.preguntas = preguntas;
         this.jugador = jugador
         this.#indice = 0
@@ -145,7 +149,7 @@ class Quiz {
     }
 
     iniciar() {
-        this.preguntaActual = this.preguntas[0];
+        this.preguntaActual = this.preguntas[this.#indice];
     }
 
     mostrarPregunta() {
@@ -156,6 +160,7 @@ class Quiz {
         //este metodos nos va a ayudar a capturar las respuestas del usuario
         let res = this.preguntaActual.validarRespuesta(respuesta);
         if (res) {
+            //  console.log(this.jugador)
             this.jugador.aumentarCorrectas()
             this.jugador.sumarPuntos(this.preguntaActual.puntos)
         }
@@ -175,6 +180,15 @@ class Quiz {
             return `No ha terminado el quiz aun`
         }
     }
+
+    estadoPregunta(){
+        return `Pregunta ${this.#indice + 1} de ${this.#preguntas.length}`
+    }
+    
+    estadoPreguntaProgreso(){
+        let porcentaje = 100 / this.#preguntas.length
+        return (this.#indice + 1) * porcentaje;
+    }
 }
 
 let formInicio = document.querySelector('#form-iniciar');
@@ -185,6 +199,8 @@ let pantalla2 = document.querySelector('#pantalla-quiz');
 let estadoJugador = document.querySelector('#estado-jugador');
 let estadoPuntaje = document.querySelector('#estado-puntaje');
 let estadoCorrectas = document.querySelector('#estado-correctas');
+let estadoPregunta = document.querySelector('#estado-pregunta')
+let barraProgreso =  document.querySelector('#barra-progreso')
 
 let preguntaVisual = document.querySelector('#texto-pregunta')
 let respuestasVsual = document.querySelector('#opciones-respuesta')
@@ -199,22 +215,62 @@ const ArregloDePreguntas = [pregunta1, pregunta2, pregunta3, pregunta4, pregunta
 
 let feedbackRespuesta = document.querySelector('#feedback-respuesta')
 
+let btnSiguiente = document.querySelector('#btn-siguiente')
 
+let QuizOne;
 
 formInicio.addEventListener('submit', (event) => {
     event.preventDefault();
     let playerOne = new Jugador(event.target['nombre-jugador'].value);
-    const QuizOne = new Quiz(ArregloDePreguntas, playerOne);
+    QuizOne = new Quiz(ArregloDePreguntas, playerOne);
     QuizOne.iniciar();
-
-
-    console.log(playerOne);
     pantalla1.classList.add('d-none')
     pantalla2.classList.remove('d-none')
+
+    renderizar(playerOne)
+
+    respuestasVsual.addEventListener('click', (event) => {
+        if (event.target.disabled != undefined) {
+            event.target.classList.add('active')
+
+            let esCorrecta = QuizOne.preguntaActual.validarRespuesta(event.target.textContent)
+
+            feedbackRespuesta.textContent = `Su respuesta es ${esCorrecta ? 'correcta' : 'incorrecta'}`
+
+            if (!esCorrecta) {
+                feedbackRespuesta.classList.remove('alert-success');
+                feedbackRespuesta.classList.add('alert-danger')
+            }
+
+            feedbackRespuesta.classList.remove('d-none')
+
+            let hijos = respuestasVsual.childNodes;
+            hijos.forEach(btn => btn.disabled = true)
+
+            QuizOne.responder(event.target.textContent)
+            btnSiguiente.disabled = false;
+            btnSiguiente.classList.remove('btn-secondary');
+            btnSiguiente.classList.add('btn-success');
+
+        }
+    })
+});
+
+
+const renderizar = (playerOne) => {
+    console.log(playerOne);
+    estadoPregunta.textContent = QuizOne.estadoPregunta()
+    barraProgreso.style = `width: ${QuizOne.estadoPreguntaProgreso()}%`
+    feedbackRespuesta.classList.add('d-none');
+    feedbackRespuesta.classList.add('alert-success');
+    feedbackRespuesta.classList.remove('alert-danger')
+
 
     estadoJugador.textContent = `Jugador: ${playerOne.nombre}`
     estadoPuntaje.textContent = playerOne.puntaje
     estadoCorrectas.textContent = `Correctas: ${playerOne.respuestasCorrectas}`
+
+    respuestasVsual.innerHTML = ''
 
     preguntaVisual.textContent = QuizOne.preguntaActual.texto
 
@@ -226,22 +282,11 @@ formInicio.addEventListener('submit', (event) => {
         respuestasVsual.append(btnRespuesta)
 
     });
+}
 
-    respuestasVsual.addEventListener('click', (event) => {
-        event.target.classList.add('active')
-
-        let esCorrecta = QuizOne.preguntaActual.validarRespuesta(event.target.textContent)
-
-        feedbackRespuesta.textContent = `Su respuesta es ${ esCorrecta ? 'correcta' : 'incorrecta'}`
-        if(!esCorrecta){
-            feedbackRespuesta.classList.remove('alert-success');
-            feedbackRespuesta.classList.add('alert-danger')
-        }
-
-        feedbackRespuesta.classList.remove('d-none')
+btnSiguiente.addEventListener('click', (event) => {
+    QuizOne.siguientePregunta()
+    renderizar(QuizOne.jugador)
+})
 
 
-        QuizOne.responder(event.target.textContent)
-
-    })
-});
