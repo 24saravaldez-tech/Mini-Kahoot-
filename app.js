@@ -21,6 +21,10 @@ class Jugador {
         return `Tienes ${this.#puntaje}`
     }
 
+    get puntos() {
+        return this.#puntaje
+    }
+
     set puntaje(value) {
         this.#puntaje = value
     }
@@ -38,7 +42,6 @@ class Jugador {
     }
 
     aumentarCorrectas() {
-        // return this.respuestasCorrectas = this.respuestasCorrectas + 1;
         this.respuestasCorrectas = this.respuestasCorrectas + 1;
     }
 
@@ -157,10 +160,8 @@ class Quiz {
     }
 
     responder(respuesta) {
-        //este metodos nos va a ayudar a capturar las respuestas del usuario
         let res = this.preguntaActual.validarRespuesta(respuesta);
         if (res) {
-            //  console.log(this.jugador)
             this.jugador.aumentarCorrectas()
             this.jugador.sumarPuntos(this.preguntaActual.puntos)
         }
@@ -169,23 +170,18 @@ class Quiz {
     siguientePregunta() {
         this.#indice++;
         this.preguntaActual = this.preguntas[this.#indice];
-        //        return this.preguntas[this.#indice]
     }
 
     finalizarQuiz() {
-        if (this.#indice == this.preguntas.length - 1) {
-            //se acabo
-            return `Se termino el quiz, podra ver sus resultado a continuacion`
-        } else {
-            return `No ha terminado el quiz aun`
-        }
+        return { nombre: this.jugador.nombre, puntaje: this.jugador.puntos, correctas: this.jugador.respuestasCorrectas }
+
     }
 
-    estadoPregunta(){
+    estadoPregunta() {
         return `Pregunta ${this.#indice + 1} de ${this.#preguntas.length}`
     }
-    
-    estadoPreguntaProgreso(){
+
+    estadoPreguntaProgreso() {
         let porcentaje = 100 / this.#preguntas.length
         return (this.#indice + 1) * porcentaje;
     }
@@ -195,12 +191,13 @@ let formInicio = document.querySelector('#form-iniciar');
 
 let pantalla1 = document.querySelector('#pantalla-inicio');
 let pantalla2 = document.querySelector('#pantalla-quiz');
+let pantalla3 = document.querySelector('#pantalla-final');
 
 let estadoJugador = document.querySelector('#estado-jugador');
 let estadoPuntaje = document.querySelector('#estado-puntaje');
 let estadoCorrectas = document.querySelector('#estado-correctas');
 let estadoPregunta = document.querySelector('#estado-pregunta')
-let barraProgreso =  document.querySelector('#barra-progreso')
+let barraProgreso = document.querySelector('#barra-progreso')
 
 let preguntaVisual = document.querySelector('#texto-pregunta')
 let respuestasVsual = document.querySelector('#opciones-respuesta')
@@ -216,45 +213,58 @@ const ArregloDePreguntas = [pregunta1, pregunta2, pregunta3, pregunta4, pregunta
 let feedbackRespuesta = document.querySelector('#feedback-respuesta')
 
 let btnSiguiente = document.querySelector('#btn-siguiente')
+let btnFinalizar = document.querySelector('#btn-finalizado')
+let btnReiniciar = document.querySelector('#btn-reiniciar')
+
+let resultadoJugador = document.querySelector('#resultado-jugador')
+let resultadoPuntaje = document.querySelector('#resultado-puntaje')
+let resultadoCorrectas = document.querySelector('#resultado-correctas')
+
 
 let QuizOne;
+
 
 formInicio.addEventListener('submit', (event) => {
     event.preventDefault();
     let playerOne = new Jugador(event.target['nombre-jugador'].value);
     QuizOne = new Quiz(ArregloDePreguntas, playerOne);
     QuizOne.iniciar();
+    formInicio.reset();
+
     pantalla1.classList.add('d-none')
     pantalla2.classList.remove('d-none')
 
     renderizar(playerOne)
-
-    respuestasVsual.addEventListener('click', (event) => {
-        if (event.target.disabled != undefined) {
-            event.target.classList.add('active')
-
-            let esCorrecta = QuizOne.preguntaActual.validarRespuesta(event.target.textContent)
-
-            feedbackRespuesta.textContent = `Su respuesta es ${esCorrecta ? 'correcta' : 'incorrecta'}`
-
-            if (!esCorrecta) {
-                feedbackRespuesta.classList.remove('alert-success');
-                feedbackRespuesta.classList.add('alert-danger')
-            }
-
-            feedbackRespuesta.classList.remove('d-none')
-
-            let hijos = respuestasVsual.childNodes;
-            hijos.forEach(btn => btn.disabled = true)
-
-            QuizOne.responder(event.target.textContent)
-            btnSiguiente.disabled = false;
-            btnSiguiente.classList.remove('btn-secondary');
-            btnSiguiente.classList.add('btn-success');
-
-        }
-    })
 });
+
+respuestasVsual.addEventListener('click', (event) => {
+    if (event.target.disabled != undefined) {
+        event.target.classList.add('active')
+
+        let esCorrecta = QuizOne.preguntaActual.validarRespuesta(event.target.textContent)
+
+        feedbackRespuesta.textContent = `Su respuesta es ${esCorrecta ? 'correcta' : 'incorrecta'}`
+
+        if (!esCorrecta) {
+            feedbackRespuesta.classList.remove('alert-success');
+            feedbackRespuesta.classList.add('alert-danger')
+        }
+
+        feedbackRespuesta.classList.remove('d-none')
+
+        let hijos = respuestasVsual.childNodes;
+        hijos.forEach(btn => btn.disabled = true)
+
+        QuizOne.responder(event.target.textContent)
+        btnSiguiente.disabled = false;
+        btnSiguiente.classList.remove('btn-secondary');
+        btnSiguiente.classList.add('btn-success');
+
+        if (!btnFinalizar.classList.contains('d-none')) {
+            btnFinalizar.disabled = false;
+        }
+    }
+})
 
 
 const renderizar = (playerOne) => {
@@ -282,6 +292,12 @@ const renderizar = (playerOne) => {
         respuestasVsual.append(btnRespuesta)
 
     });
+
+    if (QuizOne.estadoPreguntaProgreso() == 100) {
+        btnFinalizar.classList.remove('d-none')
+        btnSiguiente.classList.add('d-none')
+    }
+    btnSiguiente.disabled = true
 }
 
 btnSiguiente.addEventListener('click', (event) => {
@@ -290,3 +306,24 @@ btnSiguiente.addEventListener('click', (event) => {
 })
 
 
+btnFinalizar.addEventListener('click', (event) => {
+    pantalla2.classList.add('d-none')
+    pantalla3.classList.remove('d-none')
+
+    let fin = QuizOne.finalizarQuiz()
+
+    resultadoJugador.textContent = fin.nombre
+    resultadoCorrectas.textContent = fin.correctas
+    resultadoPuntaje.textContent = fin.puntaje
+
+    btnFinalizar.classList.add('d-none')
+    btnSiguiente.classList.remove('d-none')
+
+})
+
+btnReiniciar.addEventListener('click', (event) => {
+    QuizOne.jugador.reiniciar()
+
+    pantalla3.classList.add('d-none')
+    pantalla1.classList.remove('d-none')
+})
