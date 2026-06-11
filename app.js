@@ -1,5 +1,5 @@
 class Jugador {
-    #nombre;
+    #nombre; //mantiene en privado el nombre del jugador para que no pueda ser cambiado o manipulado por el usuario
     #puntaje;
     #respuestasCorrectas;
 
@@ -203,10 +203,10 @@ let preguntaVisual = document.querySelector('#texto-pregunta')
 let respuestasVsual = document.querySelector('#opciones-respuesta')
 
 const pregunta1 = new Pregunta('Cual es mi edad?', ['10', '20', '30', '40'], '30', 10)
-const pregunta2 = new Pregunta('Cual es mi sueldo?', ['10', '20', '30', '40'], '10', 10)
-const pregunta3 = new Pregunta('Cual es mi mercado?', ['10', '20', '30', '40'], '20', 10)
-const pregunta4 = new Pregunta('Cual es mi fecha de nacimiento?', ['10', '20', '30', '40'], '30', 10)
-const pregunta5 = new Pregunta('Cual es mi comida fav?', ['10', '20', '30', '40'], '40', 10)
+const pregunta2 = new Pregunta('Cual es mi sueldo?', ['3000', '20000', '300', '400000'], '20000', 10)
+const pregunta3 = new Pregunta('Cual es mi mercado?', ['tech', 'pyscho', 'learning', 'cooking'], 'cooking', 10)
+const pregunta4 = new Pregunta('Cual es mi fecha de nacimiento?', ['10-05', '20-03', '30-10', '4-09'], '20-03', 10)
+const pregunta5 = new Pregunta('Cual es mi comida fav?', ['pasta', 'cake', 'salad', 'cheese'], 'cheese', 10)
 
 const ArregloDePreguntas = [pregunta1, pregunta2, pregunta3, pregunta4, pregunta5]
 
@@ -236,6 +236,7 @@ formInicio.addEventListener('submit', (event) => {
 
     renderizar(playerOne)
 });
+
 
 respuestasVsual.addEventListener('click', (event) => {
     if (event.target.disabled != undefined) {
