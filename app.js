@@ -264,7 +264,7 @@ respuestasVsual.addEventListener('click', (event) => {
 
         feedbackRespuesta.classList.remove('d-none')
 
-        let hijos = respuestasVsual.childNodes;
+        let hijos = respuestasVsual.childNodes; //regresa un arreglo de nodos, o un HTML collection.
         hijos.forEach(btn => btn.disabled = true)
 
         QuizOne.responder(event.target.textContent)
