@@ -1,7 +1,9 @@
 class Jugador {
-    #nombre; //mantiene en privado el nombre del jugador para que no pueda ser cambiado o manipulado por el usuario
+    #nombre; // # mantiene en privado el nombre del jugador para que no pueda ser cambiado o manipulado por el usuario
     #puntaje;
-    #respuestasCorrectas;
+    #respuestasCorrectas; //PROPIEDADES!!!!!
+
+    //las propiedades privadas solo se pueden utilizar dentro de la misma clase.
 
     constructor(nombre) {
         this.nombre = nombre;
@@ -9,25 +11,32 @@ class Jugador {
         this.#respuestasCorrectas = 0;
     }
 
+    //GET Y SET SOLO SON PARA PROPIEDADES PRIVADADS Y PARA PROPIEDADS VIRTUALES
+
+    //metodos getter devuelven el valor de esa propiedad o algo relacionado con esa propiedad.
+    //estos mismos simulan a la propiedad publica
     get nombre() {
         return this.#nombre
     }
 
+    //metodos setter asignar y validar el valor. 
     set nombre(value) {
-        this.#nombre = value
+        this.#nombre = value //la unica manera de reasignar valores a una propiedad privada es a 
+        // traves del setter. Si al intentar reasignarla pasa todas las validaciones del setter. 
+        // Si las pasa, el getter devuelve el nombre ya reasignado. De lo contrario, lanza un error o bien no lo permite.
     }
 
     get puntaje() {
         return `Tienes ${this.#puntaje}`
     }
 
-    get puntos() {
+    get puntos() { //propiedades virtuales: funciona sin tener una propiedad privada, pero solo si es referida o llamada con una propiedad que si esta definida y privada.
         return this.#puntaje
     }
 
-    set puntaje(value) {
-        this.#puntaje = value
-    }
+    // set puntaje(value) {
+    //     this.#puntaje = value
+    // }
 
     get respuestasCorrectas() {
         return this.#respuestasCorrectas
@@ -38,7 +47,7 @@ class Jugador {
     }
 
     sumarPuntos(puntos) {
-        this.#puntaje = this.#puntaje + puntos
+        this.#puntaje = this.#puntaje + puntos //aqui se modifica directamente la propiedad privada.
     }
 
     aumentarCorrectas() {
@@ -50,12 +59,14 @@ class Jugador {
     reiniciar() {
         this.nombre = '';
         this.respuestasCorrectas = 0;
-        this.puntaje = 0;
+        this.#puntaje = 0;
     }
 }
 
-
-
+//EJEMPLOOOOOOOOOOO!!!!
+// let Daniel = new Jugador('Daniel')
+// Daniel.nombre = 'Macario' //Aqui se activa el setter
+// console.log(Daniel.nombre) //aqui se activa el getter
 
 
 class Pregunta {
@@ -68,7 +79,7 @@ class Pregunta {
         this.texto = texto;
         this.opciones = opciones;
         this.respuestaCorrecta = respuestaCorrecta;
-        this.puntos = puntos
+        this.puntos = puntos //se le asigna a... las propiedades publicas. Es el setter el que asigna el valor de texto (publico) a #texto (privado)
     }
 
 
@@ -93,13 +104,13 @@ class Pregunta {
         }
     }
 
-    get respuestaCorrecta() {
-        return this.#respuestaCorrecta
-    }
+    // get respuestaCorrecta() {
+    //     return this.#respuestaCorrecta
+    // }
 
-    set respuestaCorrecta(value) {
-        this.#respuestaCorrecta = value
-    }
+    // set respuestaCorrecta(value) {
+    //     this.#respuestaCorrecta = value
+    // }
 
     get puntos() {
         return this.#puntos
@@ -155,9 +166,9 @@ class Quiz {
         this.preguntaActual = this.preguntas[this.#indice];
     }
 
-    mostrarPregunta() {
-        return this.preguntaActual
-    }
+    // mostrarPregunta() {
+    //     return this.preguntaActual
+    // }
 
     responder(respuesta) {
         let res = this.preguntaActual.validarRespuesta(respuesta);
@@ -225,22 +236,22 @@ let QuizOne;
 
 
 formInicio.addEventListener('submit', (event) => {
-    event.preventDefault();
+    event.preventDefault(); //evita que se recargue la pagina.
     let playerOne = new Jugador(event.target['nombre-jugador'].value);
     QuizOne = new Quiz(ArregloDePreguntas, playerOne);
     QuizOne.iniciar();
-    formInicio.reset();
+    formInicio.reset(); //evita que el nombre vuelva a aparecer al reiniciar el juego
 
-    pantalla1.classList.add('d-none')
-    pantalla2.classList.remove('d-none')
+    pantalla1.classList.add('d-none') //esconde la pantalla de inicio
+    pantalla2.classList.remove('d-none') //pasa a la segunda pantalla, la de las preguntas.
 
-    renderizar(playerOne)
+    renderizar(playerOne) //esto cambia el progreso, el porcentaje, la pregunta.
 });
 
 
 respuestasVsual.addEventListener('click', (event) => {
-    if (event.target.disabled != undefined) {
-        event.target.classList.add('active')
+    if (event.target.disabled != undefined) { //si es distinta a disabled significa que si existe/ No recibe los eventos.
+        event.target.classList.add('active') //hace que el boton se quede azul.
 
         let esCorrecta = QuizOne.preguntaActual.validarRespuesta(event.target.textContent)
 
