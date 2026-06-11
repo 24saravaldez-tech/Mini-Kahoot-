@@ -78,7 +78,7 @@ class Pregunta {
     constructor(texto, opciones, respuestaCorrecta, puntos) {
         this.texto = texto;
         this.opciones = opciones;
-        this.respuestaCorrecta = respuestaCorrecta;
+        this.#respuestaCorrecta = respuestaCorrecta;
         this.puntos = puntos //se le asigna a... las propiedades publicas. Es el setter el que asigna el valor de texto (publico) a #texto (privado)
     }
 
@@ -103,14 +103,6 @@ class Pregunta {
             throw new Error('No se aceptan valores distintos de un array')
         }
     }
-
-    // get respuestaCorrecta() {
-    //     return this.#respuestaCorrecta
-    // }
-
-    // set respuestaCorrecta(value) {
-    //     this.#respuestaCorrecta = value
-    // }
 
     get puntos() {
         return this.#puntos
